@@ -15,9 +15,9 @@ class Game:
 
         self.all_sprites_list = pygame.sprite.Group()
 
-        player = Player(sprite_sheet=self.sprite_sheet_image,
-                        width=16, height=15, scale=2)
-        self.all_sprites_list.add(player)
+        self.player = Player(sprite_sheet=self.sprite_sheet_image,
+                             width=16, height=15, scale=3)
+        self.all_sprites_list.add(self.player)
 
     def play(self):
         done = False
@@ -41,7 +41,21 @@ class Game:
         return False
 
     def run_logic(self):
-        pass
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:
+            self.player.move_player(0, -1)
+            self.player.angle = 0
+        elif keys[pygame.K_DOWN]:
+            self.player.move_player(0, 1)
+            self.player.angle = -180
+        elif keys[pygame.K_RIGHT]:
+            self.player.move_player(1, 0)
+            self.player.angle = -90
+        elif keys[pygame.K_LEFT]:
+            self.player.move_player(-1, 0)
+            self.player.angle = -270
+
+        self.player.draw_player()
 
     def display_frame(self, screen):
         screen.fill(Colors.BG)
