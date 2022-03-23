@@ -1,12 +1,13 @@
 import pygame
 
+from game_configuration import GameConfiguration
 from player import Player
 from settings import GameSettings, Colors
 
 
 class Game:
     def __init__(self) -> None:
-
+        self.game_configuration = GameConfiguration()
         self.game_over = False
 
         self.sprite_sheet_image = pygame.image.load(
@@ -17,6 +18,20 @@ class Game:
         player = Player(sprite_sheet=self.sprite_sheet_image,
                         width=16, height=15, scale=2)
         self.all_sprites_list.add(player)
+
+    def play(self):
+        done = False
+        while not done:
+
+            done = self.process_events()
+
+            self.run_logic()
+
+            self.display_frame(self.game_configuration.screen)
+
+            self.game_configuration.clock.tick(GameSettings.FPS)
+
+        pygame.quit()
 
     def process_events(self):
         for event in pygame.event.get():
