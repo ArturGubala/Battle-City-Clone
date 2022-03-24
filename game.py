@@ -42,18 +42,10 @@ class Game:
 
     def run_logic(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            self.player.move_player(0, -1)
-            self.player.angle = 0
-        elif keys[pygame.K_DOWN]:
-            self.player.move_player(0, 1)
-            self.player.angle = -180
-        elif keys[pygame.K_RIGHT]:
-            self.player.move_player(1, 0)
-            self.player.angle = -90
-        elif keys[pygame.K_LEFT]:
-            self.player.move_player(-1, 0)
-            self.player.angle = -270
+        for key, movment_condition in self.player.movement_conditions.items():
+            if keys[key] and movment_condition():
+                self.player.movement[key]()
+                break
 
         self.player.draw_player()
 
