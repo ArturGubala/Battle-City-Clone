@@ -2,32 +2,26 @@ import pygame
 
 from game_configuration import GameConfiguration
 from player import Player
-from settings import GameSettings, Colors
+from settings import GameSettings
+from screen import ScreenHandler
 
 
 class Game:
     def __init__(self) -> None:
         self.game_configuration = GameConfiguration()
         self.game_over = False
-
-        self.sprite_sheet_image = pygame.image.load(
-            GameSettings.SPRITE_SHEET).convert_alpha()
-
-        self.all_sprites_list = pygame.sprite.Group()
-
-        self.player = Player(sprite_sheet=self.sprite_sheet_image,
-                             width=16, height=15, scale=3)
-        self.all_sprites_list.add(self.player)
+        self.done = False
+        self.screen_handler = ScreenHandler()
+        self.player = Player()
 
     def play(self):
-        done = False
-        while not done:
+        while not self.done:
 
-            done = self.process_events()
+            self.done = self.process_events()
 
             self.run_logic()
 
-            self.display_frame(self.game_configuration.screen)
+            self.display_screen()
 
             self.game_configuration.clock.tick(GameSettings.FPS)
 
@@ -47,15 +41,9 @@ class Game:
                 self.player.movement[key]()
                 break
 
-        self.player.draw_player()
+        self.screen_handler.update_player_sprite(
+            self.player.get_actual_position())
+        self.screen_handler.draw()
 
-    def display_frame(self, screen):
-        screen.fill(Colors.BG)
-
-        if self.game_over:
-            pass
-
-        if not self.game_over:
-            self.all_sprites_list.draw(screen)
-
-        pygame.display.flip()
+    def display_screen(self):
+        self.screen_handler.draw()
