@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
-
 import os.path
 
 
 @dataclass
 class GameSettings:
-    WINDOW_WIDTH = 640
-    WINDOW_HEIGHT = 480
+    WINDOW_WIDTH = 1280
+    WINDOW_HEIGHT = 960
     FPS = 60
     CAPTION = "Battle City Clone"
     SPRITE_SHEET = os.path.join(

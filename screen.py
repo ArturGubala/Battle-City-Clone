@@ -6,8 +6,7 @@ from settings import GameSettings, Colors, PlayerSettings
 
 class ScreenHandler:
     def __init__(self) -> None:
-        self.screen = pygame.display.set_mode(
-            (GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT))
+        self.display_surface = pygame.display.get_surface()
         self.all_sprites_list = pygame.sprite.Group()
         self.sprite_sheet_image = pygame.image.load(
             GameSettings.SPRITE_SHEET).convert()
@@ -19,8 +18,8 @@ class ScreenHandler:
         self.add_to_screen(self.player_drawer)
 
     def draw(self):
-        self.screen.fill(Colors.BG)
-        self.all_sprites_list.draw(self.screen)
+        self.display_surface.fill(Colors.BG)
+        self.all_sprites_list.draw(self.display_surface)
         pygame.display.flip()
 
     def add_to_screen(self, *sprites):
@@ -46,11 +45,11 @@ class PlayerDrawer(pygame.sprite.Sprite):
                           (0, 0, player_info["player_width"], player_info["player_height"]))
         self.pattern = pygame.transform.scale(
             self.pattern, (player_info["player_width"] * player_info["scale"], player_info["player_height"] * player_info["scale"],))
+        self.pattern.set_colorkey(Colors.BLACK)
 
     def create_sprite(self, pos_x, pos_y, angle) -> None:
         self.image = pygame.transform.rotate(
             self.pattern, angle)
-        self.image.set_colorkey(Colors.BLACK)
         self.rect = self.image.get_rect(center=(pos_x, pos_y))
 
 
