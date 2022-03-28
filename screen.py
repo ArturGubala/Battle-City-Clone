@@ -12,6 +12,7 @@ class ScreenHandler:
             GameSettings.SPRITE_SHEET).convert()
 
         self.player_drawer = PlayerDrawer(self.sprite_sheet_image,
+                                          pos=PlayerSettings.STARTING_POS,
                                           player_width=PlayerSettings.PLAYER_WIDTH,
                                           player_height=PlayerSettings.PLAYER_HEIGHT,
                                           scale=PlayerSettings.SCALE)
@@ -26,10 +27,8 @@ class ScreenHandler:
         for sprite in sprites:
             self.all_sprites_list.add(sprite)
 
-    def update_player_sprite(self, actual_player_cords):
-        self.player_drawer.create_sprite(actual_player_cords["actual_pos_x"],
-                                         actual_player_cords["actual_pos_y"],
-                                         actual_player_cords["angle"])
+    def update_player_sprite(self):
+        self.player_drawer.create_sprite()
 
 
 class Drawer(ABC):
@@ -46,11 +45,13 @@ class PlayerDrawer(pygame.sprite.Sprite):
         self.pattern = pygame.transform.scale(
             self.pattern, (player_info["player_width"] * player_info["scale"], player_info["player_height"] * player_info["scale"],))
         self.pattern.set_colorkey(Colors.BLACK)
+        self.direction = pygame.math.Vector2()
+        self.angle = PlayerSettings.ANGLE
+        self.rect = self.pattern.get_rect(center=(player_info["pos"]))
 
-    def create_sprite(self, pos_x, pos_y, angle) -> None:
+    def create_sprite(self) -> None:
         self.image = pygame.transform.rotate(
-            self.pattern, angle)
-        self.rect = self.image.get_rect(center=(pos_x, pos_y))
+            self.pattern, self.angle)
 
 
 class ScreenDrawer:

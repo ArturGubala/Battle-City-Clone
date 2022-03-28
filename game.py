@@ -1,8 +1,7 @@
 import pygame
 
 from game_configuration import GameConfiguration
-from player import Player
-from settings import GameSettings
+from settings import GameSettings, PlayerSettings
 from screen import ScreenHandler
 from move_controller import MoveController
 
@@ -14,7 +13,6 @@ class Game:
         self.done = False
         self.screen_handler = ScreenHandler()
         self.move_controller = MoveController()
-        self.player = Player()
 
     def play(self):
         while not self.done:
@@ -38,10 +36,11 @@ class Game:
 
     def run_logic(self):
         keys = pygame.key.get_pressed()
-        self.move_controller.move_player(keys, self.player)
+        self.move_controller.move(keys,
+                                  self.screen_handler.player_drawer,
+                                  PlayerSettings.SPEED)
 
-        self.screen_handler.update_player_sprite(
-            self.player.get_actual_position())
+        self.screen_handler.update_player_sprite()
         self.screen_handler.draw()
 
     def display_screen(self):
