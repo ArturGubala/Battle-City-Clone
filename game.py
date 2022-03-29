@@ -14,7 +14,7 @@ class Game:
         self.screen_handler = ScreenHandler()
         self.move_controller = MoveController()
 
-    def play(self):
+    def play(self) -> None:
         while not self.done:
 
             self.done = self.process_events()
@@ -27,21 +27,19 @@ class Game:
 
         pygame.quit()
 
-    def process_events(self):
+    def process_events(self) -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True
 
         return False
 
-    def run_logic(self):
+    def run_logic(self) -> None:
         keys = pygame.key.get_pressed()
         self.move_controller.move(keys,
                                   self.screen_handler.player_drawer,
                                   PlayerSettings.SPEED)
 
+    def display_screen(self) -> None:
         self.screen_handler.update_player_sprite()
-        self.screen_handler.draw()
-
-    def display_screen(self):
         self.screen_handler.draw()

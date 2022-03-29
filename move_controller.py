@@ -7,10 +7,10 @@ class MoveController:
     def __init__(self) -> None:
 
         self.movement = {
-            pygame.K_UP: [self.__set_direction_y, -1, 0],
-            pygame.K_DOWN: [self.__set_direction_y, 1, -180],
-            pygame.K_RIGHT: [self.__set_direction_x, 1, -90],
-            pygame.K_LEFT: [self.__set_direction_x, -1, -270]
+            pygame.K_UP: [self.__set_direction_y, -1, 'up'],
+            pygame.K_DOWN: [self.__set_direction_y, 1, 'down'],
+            pygame.K_RIGHT: [self.__set_direction_x, 1, 'right'],
+            pygame.K_LEFT: [self.__set_direction_x, -1, 'left']
         }
         self.movement_conditions = {
             pygame.K_UP: self.__can_move_up,
@@ -19,15 +19,15 @@ class MoveController:
             pygame.K_LEFT: self.__can_move_left,
         }
 
-    def __set_direction_y(self, object, direction, angle) -> None:
+    def __set_direction_y(self, object, direction, status) -> None:
         object.direction.y = direction
         object.direction.x = 0
-        object.angle = angle
+        object.status = status
 
-    def __set_direction_x(self, object, direction, angle) -> None:
+    def __set_direction_x(self, object, direction, status) -> None:
         object.direction.x = direction
         object.direction.y = 0
-        object.angle = angle
+        object.status = status
 
     def __can_move_up(self, object) -> bool:
         return object.rect.top > 0
@@ -49,3 +49,6 @@ class MoveController:
                                       self.movement[key][2])
                 object.rect.center += object.direction * speed
                 break
+            else:
+                object.direction.x = 0
+                object.direction.y = 0

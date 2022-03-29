@@ -21,10 +21,7 @@ class Colors:
 
 @dataclass
 class PlayerSettings:
-    PLAYER_WIDTH = 16
-    PLAYER_HEIGHT = 16
-    SCALE = 3
-    STARTING_POS = (GameSettings.WINDOW_WIDTH // 2 - PLAYER_WIDTH // 2,
-                    GameSettings.WINDOW_HEIGHT // 2 - PLAYER_HEIGHT // 2)
-    SPEED = 5
-    ANGLE = 0
+    PLAYER_SIZE = (64, 64)
+    STARTING_POS = (GameSettings.WINDOW_WIDTH // 2 - PLAYER_SIZE[0] // 2,
+                    GameSettings.WINDOW_HEIGHT // 2 - PLAYER_SIZE[1] // 2)
+    SPEED = 6
