@@ -17,9 +17,10 @@ class Colors:
 
 @dataclass
 class PlayerSettings:
-    PLAYER_SIZE = (48, 48)
+    PLAYER_SIZE = (64, 64)
     STARTING_POS = (448, 896)
     SPEED = 6
+    ASSIST_LEVEL = 15
 
 
 @dataclass

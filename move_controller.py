@@ -1,5 +1,7 @@
 import pygame
 
+from settings import PlayerSettings
+
 
 class MoveController:
     def __init__(self) -> None:
@@ -40,13 +42,34 @@ class MoveController:
                 if sprite.rect.colliderect(object.rect):
                     if object.direction.x > 0:  # moving right
                         object.rect.right = sprite.rect.left
+                        self.__assist_while_turning("horizontal",
+                                                    object,
+                                                    sprite)
                     if object.direction.x < 0:  # moving left
                         object.rect.left = sprite.rect.right
+                        self.__assist_while_turning("horizontal",
+                                                    object,
+                                                    sprite)
 
         if direction == 'vertical':
             for sprite in group:
                 if sprite.rect.colliderect(object.rect):
                     if object.direction.y > 0:  # moving down
                         object.rect.bottom = sprite.rect.top
+                        self.__assist_while_turning("vertical", object, sprite)
                     if object.direction.y < 0:  # moving up
                         object.rect.top = sprite.rect.bottom
+                        self.__assist_while_turning("vertical", object, sprite)
+
+    def __assist_while_turning(self, direction, turning_object, obstacle):
+        if direction == 'vertical':
+            if (obstacle.rect.right - turning_object.rect.left) < PlayerSettings.ASSIST_LEVEL:
+                turning_object.rect.left = obstacle.rect.right
+            if (turning_object.rect.right - obstacle.rect.left) < PlayerSettings.ASSIST_LEVEL:
+                turning_object.rect.right = obstacle.rect.left
+
+        if direction == 'horizontal':
+            if (obstacle.rect.bottom - turning_object.rect.top) < PlayerSettings.ASSIST_LEVEL:
+                turning_object.rect.top = obstacle.rect.bottom
+            if (turning_object.rect.bottom - obstacle.rect.top) < PlayerSettings.ASSIST_LEVEL:
+                turning_object.rect.bottom = obstacle.rect.top
