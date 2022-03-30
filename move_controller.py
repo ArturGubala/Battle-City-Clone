@@ -1,7 +1,5 @@
 import pygame
 
-from settings import GameSettings
-
 
 class MoveController:
     def __init__(self) -> None:
@@ -11,12 +9,6 @@ class MoveController:
             pygame.K_DOWN: [self.__set_direction_y, 1, 'down'],
             pygame.K_RIGHT: [self.__set_direction_x, 1, 'right'],
             pygame.K_LEFT: [self.__set_direction_x, -1, 'left']
-        }
-        self.movement_conditions = {
-            pygame.K_UP: self.__can_move_up,
-            pygame.K_DOWN: self.__can_move_down,
-            pygame.K_RIGHT: self.__can_move_right,
-            pygame.K_LEFT: self.__can_move_left,
         }
 
     def __set_direction_y(self, object, direction, status) -> None:
@@ -29,26 +21,32 @@ class MoveController:
         object.direction.y = 0
         object.status = status
 
-    def __can_move_up(self, object) -> bool:
-        return object.rect.top > 0
-
-    def __can_move_down(self, object) -> bool:
-        return object.rect.bottom < GameSettings.WINDOW_HEIGHT
-
-    def __can_move_right(self, object) -> bool:
-        return object.rect.right < GameSettings.WINDOW_WIDTH
-
-    def __can_move_left(self, object) -> bool:
-        return object.rect.left > 0
-
-    def move(self, pressed_keys, object, speed) -> None:
-        for key, movment_condition in self.movement_conditions.items():
-            if pressed_keys[key] and movment_condition(object):
-                self.movement[key][0](object,
-                                      self.movement[key][1],
-                                      self.movement[key][2])
-                object.rect.center += object.direction * speed
+    def move(self, pressed_keys, object, speed, **groups) -> None:
+        for key, move in self.movement.items():
+            if pressed_keys[key]:
+                move[0](object, move[1], move[2])
+                object.rect.x += object.direction.x * speed
+                self.collision('horizontal', object, groups["obstacle_group"])
+                object.rect.y += object.direction.y * speed
+                self.collision('vertical', object, groups["obstacle_group"])
                 break
             else:
                 object.direction.x = 0
                 object.direction.y = 0
+
+    def collision(self, direction, object, group):
+        if direction == 'horizontal':
+            for sprite in group:
+                if sprite.rect.colliderect(object.rect):
+                    if object.direction.x > 0:  # moving right
+                        object.rect.right = sprite.rect.left
+                    if object.direction.x < 0:  # moving left
+                        object.rect.left = sprite.rect.right
+
+        if direction == 'vertical':
+            for sprite in group:
+                if sprite.rect.colliderect(object.rect):
+                    if object.direction.y > 0:  # moving down
+                        object.rect.bottom = sprite.rect.top
+                    if object.direction.y < 0:  # moving up
+                        object.rect.top = sprite.rect.bottom

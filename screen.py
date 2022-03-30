@@ -1,30 +1,33 @@
 from abc import ABC
 import pygame
 
-from settings import Colors, PlayerSettings
-import support
+
+from settings import Colors, PlayerSettings, SpriteSettings
+from file_system_handler import FileSystemHandler
 
 
 class ScreenHandler:
     def __init__(self) -> None:
         self.display_surface = pygame.display.get_surface()
-        self.all_sprites_list = pygame.sprite.Group()
+
+        self.player_group = pygame.sprite.Group()
+        self.obstacle_group = pygame.sprite.Group()
 
         self.player_drawer = PlayerDrawer(pos=PlayerSettings.STARTING_POS,
-                                          player_size=PlayerSettings.PLAYER_SIZE)
-        self.add_to_screen(self.player_drawer)
+                                          player_size=PlayerSettings.PLAYER_SIZE,
+                                          group=self.player_group)
+
+        self.stage = StageDrawer()
+        self.stage.create_map(self.obstacle_group)
 
     def draw(self) -> None:
         self.display_surface.fill(Colors.BG)
-        self.all_sprites_list.draw(self.display_surface)
-        pygame.display.flip()
+        self.obstacle_group.draw(self.display_surface)
+        self.player_group.draw(self.display_surface)
 
-    def add_to_screen(self, *sprites) -> None:
-        for sprite in sprites:
-            self.all_sprites_list.add(sprite)
-
-    def update_player_sprite(self) -> None:
+    def update(self) -> None:
         self.player_drawer.update()
+        pygame.display.update()
 
 
 class Drawer(ABC):
@@ -33,11 +36,11 @@ class Drawer(ABC):
 
 class PlayerDrawer(pygame.sprite.Sprite):
     def __init__(self, **player_info) -> None:
-        super().__init__()
+        super().__init__(player_info["group"])
         self.image = pygame.transform.scale(pygame.image.load(
             'Sprites/Player/player.png').convert_alpha(), player_info["player_size"])
         self.direction = pygame.math.Vector2()
-        self.rect = self.image.get_rect(center=(player_info["pos"]))
+        self.rect = self.image.get_rect(bottomright=(player_info["pos"]))
 
         # graphics setup
         self.import_player_assets()
@@ -71,11 +74,40 @@ class PlayerDrawer(pygame.sprite.Sprite):
 
         for animation in self.animations.keys():
             full_path = character_path + animation
-            self.animations[animation] = support.import_folder(full_path)
+            self.animations[animation] = FileSystemHandler.import_folder(
+                full_path)
 
 
-class ScreenDrawer:
-    pass
+class ObstacleDrawer(pygame.sprite.Sprite):
+    def __init__(self, pos, groups, sprite_type, surface):
+        super().__init__(groups)
+        self.sprite_type = sprite_type
+        self.image = pygame.transform.scale(surface, (64, 64))
+        self.rect = self.image.get_rect(topleft=pos)
+        self.image.set_colorkey(Colors.BLACK)
+
+
+class StageDrawer:
+    def __init__(self) -> None:
+        self.display_surface = pygame.display.get_surface()
+
+    def create_map(self, group):
+        layouts = {
+            'obstacles': FileSystemHandler.import_csv_layout('Stages/Stage_0/stage_0.csv')
+        }
+        graphics = {
+            'obstacles': FileSystemHandler.import_folder('Sprites/Obstacles')
+        }
+        for style, layout in layouts.items():
+            for row_index, row in enumerate(layout):
+                for col_index, col in enumerate(row):
+                    if col != '-1':
+                        x = col_index * SpriteSettings.SPRITESIZE
+                        y = row_index * SpriteSettings.SPRITESIZE
+                        if style == 'obstacles':
+                            surf = graphics['obstacles'][int(col)]
+                            ObstacleDrawer((x, y), group,
+                                           'obstacles', surf)
 
 
 class BulletDrawer:

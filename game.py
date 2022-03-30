@@ -38,8 +38,9 @@ class Game:
         keys = pygame.key.get_pressed()
         self.move_controller.move(keys,
                                   self.screen_handler.player_drawer,
-                                  PlayerSettings.SPEED)
+                                  PlayerSettings.SPEED,
+                                  obstacle_group=self.screen_handler.obstacle_group)
 
     def display_screen(self) -> None:
-        self.screen_handler.update_player_sprite()
         self.screen_handler.draw()
+        self.screen_handler.update()
