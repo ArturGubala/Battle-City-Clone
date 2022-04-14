@@ -26,3 +26,16 @@ class PlayerSettings:
 @dataclass
 class SpriteSettings:
     SPRITESIZE = 64
+
+
+@dataclass
+class BulletSettings:
+    SPEED = 15
+
+
+@dataclass
+class EnemySettings:
+    ENEMY_SIZE = (64, 64)
+    STARTING_POS = (960, 64)
+    SPEED = 6
+    ASSIST_LEVEL = 15

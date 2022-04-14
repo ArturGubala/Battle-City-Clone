@@ -7,6 +7,7 @@ from settings import PlayerSettings
 
 
 class FileSystemHandler:
+    @staticmethod
     def import_csv_layout(path: str) -> List:
         terrain_map = []
         with open(path) as level_map:
@@ -15,6 +16,7 @@ class FileSystemHandler:
                 terrain_map.append(list(row))
             return terrain_map
 
+    @staticmethod
     def import_folder(path: str) -> List:
         surface_list = []
 

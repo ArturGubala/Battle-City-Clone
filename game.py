@@ -36,10 +36,26 @@ class Game:
 
     def run_logic(self) -> None:
         keys = pygame.key.get_pressed()
-        self.move_controller.move(keys,
-                                  self.screen_handler.player_drawer,
-                                  PlayerSettings.SPEED,
-                                  obstacle_group=self.screen_handler.obstacle_group)
+        self.move_controller.move(
+            keys,
+            self.screen_handler.player_drawer,
+            PlayerSettings.SPEED,
+            obstacle_group=self.screen_handler.obstacle_group,
+        )
+        self.move_controller.move_bullet(
+            keys,
+            self.screen_handler.player_drawer,
+            self.screen_handler.obstacle_group,
+            self.screen_handler.destroyable_group
+        )
+        self.move_controller.move_bullet(
+            keys,
+            self.screen_handler.enemy_drawer,
+            self.screen_handler.obstacle_group,
+            self.screen_handler.destroyable_group
+        )
+        self.move_controller.move_enemy(self.screen_handler.enemy_drawer,
+                                        self.screen_handler.obstacle_group)
 
     def display_screen(self) -> None:
         self.screen_handler.draw()
