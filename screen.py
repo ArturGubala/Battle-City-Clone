@@ -1,8 +1,7 @@
 import pygame
 from move_enums import MoveDirection
-from random import choice
 
-from settings import Colors, PlayerSettings, SpriteSettings, EnemySettings
+from settings import Colors, PlayerSettings, SpriteSettings, EnemySettings, StageSettings, Colors
 from file_system_handler import FileSystemHandler
 
 
@@ -43,8 +42,8 @@ class ScreenHandler:
         self.player_drawer.update()
         self.enemy_group.update()
         self.bullet_group.update()
-        self.enemy_drawer.object_detector.update()
-        self.enemy_drawer.update()
+        if self.enemy_drawer is not None:
+            self.enemy_drawer.object_detector.update()
         pygame.display.update()
 
 
@@ -52,7 +51,7 @@ class PlayerDrawer(pygame.sprite.Sprite):
     def __init__(self, **player_info) -> None:
         super().__init__(player_info["player_group"])
         self.image = pygame.transform.scale(pygame.image.load(
-            'Sprites/Player/player.png').convert_alpha(), player_info["player_size"])
+            PlayerSettings.STARTING_SPRITE_PATH).convert_alpha(), player_info["player_size"])
         self.rect = self.image.get_rect(bottomright=(player_info["pos"]))
         self.bullet_group = player_info["bullet_group"]
         self.shot_bullets = []
@@ -83,7 +82,7 @@ class PlayerDrawer(pygame.sprite.Sprite):
         self.image.set_colorkey(Colors.BLACK)
 
     def import_player_assets(self) -> None:
-        character_path = 'Sprites/Player/'
+        character_path = PlayerSettings.ANIMATION_SPRITES_PATH
         self.animations = {MoveDirection.UP: [], MoveDirection.DOWN: [], MoveDirection.LEFT: [], MoveDirection.RIGHT: [],
                            MoveDirection.UP_IDLE: [], MoveDirection.DOWN_IDLE: [], MoveDirection.LEFT_IDLE: [], MoveDirection.RIGHT_IDLE: []}
 
@@ -111,12 +110,12 @@ class StageDrawer:
     def __init__(self) -> None:
         self.display_surface = pygame.display.get_surface()
         self.layouts = {
-            'border': FileSystemHandler.import_csv_layout('Stages/Stage_0/stage_0_border.csv'),
-            'stage': FileSystemHandler.import_csv_layout('Stages/Stage_0/stage_0_stage.csv'),
-            'target': FileSystemHandler.import_csv_layout('Stages/Stage_0/stage_0_target.csv')
+            'border': FileSystemHandler.import_csv_layout(StageSettings.BORDER_LAYOUT),
+            'stage': FileSystemHandler.import_csv_layout(StageSettings.STAGE_LAYOUT),
+            'target': FileSystemHandler.import_csv_layout(StageSettings.TARGET_LAYOUT)
         }
         self.graphics = {
-            'obstacles': FileSystemHandler.import_folder('Sprites/Obstacles')
+            'obstacles': FileSystemHandler.import_folder(StageSettings.STAGE_SPRITES)
         }
 
     def create_map(self, obstacle_group, destroyable_group):
@@ -146,7 +145,7 @@ class BulletDrawer(pygame.sprite.Sprite):
     def __init__(self, group, pos, direction) -> None:
         super().__init__(group)
         self.image = pygame.Surface((16, 16))
-        self.image.fill("black")
+        self.image.fill(Colors.BLACK)
         self.rect = self.image.get_rect(center=(pos))
         self.direction = direction
 
@@ -155,7 +154,7 @@ class EnemyDrawer(pygame.sprite.Sprite):
     def __init__(self, **enemy_info) -> None:
         super().__init__(enemy_info["enemy_group"])
         self.image = pygame.transform.scale(pygame.image.load(
-            'Sprites/Player/player.png').convert_alpha(), enemy_info["enemy_size"])
+            EnemySettings.STARTING_SPRITE_PATH).convert_alpha(), enemy_info["enemy_size"])
         self.rect = self.image.get_rect(topleft=(enemy_info["pos"]))
         self.bullet_group = enemy_info["bullet_group"]
         self.shot_bullets = []
@@ -191,7 +190,7 @@ class EnemyDrawer(pygame.sprite.Sprite):
         self.image.set_colorkey(Colors.BLACK)
 
     def import_enemy_assets(self) -> None:
-        character_path = 'Sprites/Enemy/'
+        character_path = EnemySettings.ANIMATION_SPRITES_PATH
         self.animations = {MoveDirection.UP: [], MoveDirection.DOWN: [],
                            MoveDirection.LEFT: [], MoveDirection.RIGHT: []}
 
@@ -213,38 +212,38 @@ class EnemyDrawer(pygame.sprite.Sprite):
 class ObjectDetectorDrawer():
     def __init__(self, enemy_rect, surface) -> None:
         self.detectors = {
-            "up": [],
-            "down": [],
-            "left": [],
-            "right": []
+            MoveDirection.UP: [],
+            MoveDirection.DOWN: [],
+            MoveDirection.LEFT: [],
+            MoveDirection.RIGHT: []
         }
         self.enemy_rect = enemy_rect
         self.surface = surface
         self.add_detector()
 
     def add_detector(self):
-        self.detectors["up"] = [
+        self.detectors[MoveDirection.UP] = [
             pygame.draw.line(self.surface, pygame.Color('red'), self.enemy_rect.topleft,
                              (self.enemy_rect.topleft[0], self.enemy_rect.topleft[1] - 1)),
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), (self.enemy_rect.topright[0] - 1, self.enemy_rect.topright[1]), (self.enemy_rect.topright[0] - 1, self.enemy_rect.topright[1] - 1))
         ]
 
-        self.detectors["down"] = [
+        self.detectors[MoveDirection.DOWN] = [
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), (self.enemy_rect.bottomright[0] - 1, self.enemy_rect.bottomright[1]), (self.enemy_rect.bottomright[0] - 1, self.enemy_rect.bottomright[1] + 1)),
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), self.enemy_rect.bottomleft, (self.enemy_rect.bottomleft[0], self.enemy_rect.bottomleft[1] + 1))
         ]
 
-        self.detectors["left"] = [
+        self.detectors[MoveDirection.LEFT] = [
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), self.enemy_rect.topleft, (self.enemy_rect.topleft[0] - 1, self.enemy_rect.topleft[1])),
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), (self.enemy_rect.bottomleft[0], self.enemy_rect.bottomleft[1] - 1), (self.enemy_rect.bottomleft[0] - 1, self.enemy_rect.bottomleft[1] - 1))
         ]
 
-        self.detectors["right"] = [
+        self.detectors[MoveDirection.RIGHT] = [
             pygame.draw.line(self.surface, pygame.Color(
                 'red'), self.enemy_rect.topright, (self.enemy_rect.topright[0] + 1, self.enemy_rect.topright[1])),
             pygame.draw.line(self.surface, pygame.Color(

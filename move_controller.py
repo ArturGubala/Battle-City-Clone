@@ -1,7 +1,7 @@
 import pygame
-from random import randint, choice
+from random import choice
 
-from move_enums import MoveDirection
+from move_enums import MoveDirection, BulletState
 from screen import PlayerDrawer
 from settings import EnemySettings, PlayerSettings, BulletSettings
 
@@ -16,94 +16,114 @@ class MoveController:
             pygame.K_LEFT: [self.__set_direction_x, -1, MoveDirection.LEFT]
         }
 
-    def __set_direction_y(self, object, direction, status) -> None:
-        object.direction.y = direction
-        object.direction.x = 0
-        object.status = status
+    def __set_direction_y(self, character, direction, status) -> None:
+        character.direction.y = direction
+        character.direction.x = 0
+        character.status = status
 
-    def __set_direction_x(self, object, direction, status) -> None:
-        object.direction.x = direction
-        object.direction.y = 0
-        object.status = status
+    def __set_direction_x(self, character, direction, status) -> None:
+        character.direction.x = direction
+        character.direction.y = 0
+        character.status = status
 
-    def move(self, pressed_keys, object, speed, **groups) -> None:
+    def move(self, pressed_keys, character, speed, **groups) -> None:
         for key, move in self.movement.items():
             if pressed_keys[key]:
-                move[0](object, move[1], move[2])
-                object.rect.x += object.direction.x * speed
-                self.collision('horizontal', object, groups["obstacle_group"])
-                object.rect.y += object.direction.y * speed
-                self.collision('vertical', object, groups["obstacle_group"])
+                move[0](character, move[1], move[2])
+                character.rect.x += character.direction.x * speed
+                self.collision(MoveDirection.HORIZONTAL,
+                               character, groups["obstacle_group"])
+                character.rect.y += character.direction.y * speed
+                self.collision(MoveDirection.VERTICAL, character,
+                               groups["obstacle_group"])
                 return
-            object.direction.x = 0
-            object.direction.y = 0
+            character.direction.x = 0
+            character.direction.y = 0
 
-    def collision(self, direction, object, group):
-        if direction == 'horizontal':
+    def collision(self, direction, character, group):
+        if direction == MoveDirection.HORIZONTAL:
             for sprite in group:
-                if sprite.rect.colliderect(object.rect):
-                    if object.direction.x > 0:  # moving right
-                        object.rect.right = sprite.rect.left
-                        self.__assist_while_turning("horizontal",
-                                                    object,
+                if sprite.rect.colliderect(character.rect):
+                    if character.direction.x > 0:  # moving right
+                        character.rect.right = sprite.rect.left
+                        self.__assist_while_turning(MoveDirection.HORIZONTAL,
+                                                    character,
                                                     sprite)
-                    if object.direction.x < 0:  # moving left
-                        object.rect.left = sprite.rect.right
-                        self.__assist_while_turning("horizontal",
-                                                    object,
+                    if character.direction.x < 0:  # moving left
+                        character.rect.left = sprite.rect.right
+                        self.__assist_while_turning(MoveDirection.HORIZONTAL,
+                                                    character,
                                                     sprite)
 
-        if direction == 'vertical':
+        if direction == MoveDirection.VERTICAL:
             for sprite in group:
-                if sprite.rect.colliderect(object.rect):
-                    if object.direction.y > 0:  # moving down
-                        object.rect.bottom = sprite.rect.top
-                        self.__assist_while_turning("vertical", object, sprite)
-                    if object.direction.y < 0:  # moving up
-                        object.rect.top = sprite.rect.bottom
-                        self.__assist_while_turning("vertical", object, sprite)
+                if sprite.rect.colliderect(character.rect):
+                    if character.direction.y > 0:  # moving down
+                        character.rect.bottom = sprite.rect.top
+                        self.__assist_while_turning(
+                            MoveDirection.VERTICAL, character, sprite)
+                    if character.direction.y < 0:  # moving up
+                        character.rect.top = sprite.rect.bottom
+                        self.__assist_while_turning(
+                            MoveDirection.VERTICAL, character, sprite)
 
-    def __assist_while_turning(self, direction, turning_object, obstacle):
-        if direction == 'vertical':
-            if (obstacle.rect.right - turning_object.rect.left) < PlayerSettings.ASSIST_LEVEL:
-                turning_object.rect.left = obstacle.rect.right
-            if (turning_object.rect.right - obstacle.rect.left) < PlayerSettings.ASSIST_LEVEL:
-                turning_object.rect.right = obstacle.rect.left
+    def __assist_while_turning(self, direction, character, obstacle):
+        if direction == MoveDirection.VERTICAL:
+            if (obstacle.rect.right - character.rect.left) < PlayerSettings.ASSIST_LEVEL:
+                character.rect.left = obstacle.rect.right
+            if (character.rect.right - obstacle.rect.left) < PlayerSettings.ASSIST_LEVEL:
+                character.rect.right = obstacle.rect.left
 
-        if direction == 'horizontal':
-            if (obstacle.rect.bottom - turning_object.rect.top) < PlayerSettings.ASSIST_LEVEL:
-                turning_object.rect.top = obstacle.rect.bottom
-            if (turning_object.rect.bottom - obstacle.rect.top) < PlayerSettings.ASSIST_LEVEL:
-                turning_object.rect.bottom = obstacle.rect.top
+        if direction == MoveDirection.HORIZONTAL:
+            if (obstacle.rect.bottom - character.rect.top) < PlayerSettings.ASSIST_LEVEL:
+                character.rect.top = obstacle.rect.bottom
+            if (character.rect.bottom - obstacle.rect.top) < PlayerSettings.ASSIST_LEVEL:
+                character.rect.bottom = obstacle.rect.top
 
-    def move_bullet(self, keys, object, group, destroyable_group):
-        if isinstance(object, PlayerDrawer):
+    def move_bullet(self, keys, shooter, group, destroyable_group, oponent, sh):
+        if isinstance(shooter, PlayerDrawer):
             if keys[pygame.K_SPACE]:
-                object.shoot(object.bullet_group, object.rect.center)
+                shooter.shoot(shooter.bullet_group, shooter.rect.center)
         else:
-            object.shoot(object.bullet_group, object.rect.center)
-        if object.shot_bullets:
-            if MoveDirection.UP in object.shot_bullets[0].direction:
-                object.shot_bullets[0].rect.y -= BulletSettings.SPEED
-            if MoveDirection.DOWN in object.shot_bullets[0].direction:
-                object.shot_bullets[0].rect.y += BulletSettings.SPEED
-            if MoveDirection.LEFT in object.shot_bullets[0].direction:
-                object.shot_bullets[0].rect.x -= BulletSettings.SPEED
-            if MoveDirection.RIGHT in object.shot_bullets[0].direction:
-                object.shot_bullets[0].rect.x += BulletSettings.SPEED
-            self.bullet_collision(
-                object, group, destroyable_group)
+            shooter.shoot(shooter.bullet_group, shooter.rect.center)
+        if shooter.shot_bullets:
+            if MoveDirection.UP in shooter.shot_bullets[0].direction:
+                shooter.shot_bullets[0].rect.y -= BulletSettings.SPEED
+            if MoveDirection.DOWN in shooter.shot_bullets[0].direction:
+                shooter.shot_bullets[0].rect.y += BulletSettings.SPEED
+            if MoveDirection.LEFT in shooter.shot_bullets[0].direction:
+                shooter.shot_bullets[0].rect.x -= BulletSettings.SPEED
+            if MoveDirection.RIGHT in shooter.shot_bullets[0].direction:
+                shooter.shot_bullets[0].rect.x += BulletSettings.SPEED
+            wall_state = self.bullet_collision_wall(
+                shooter, group, destroyable_group)
+            if oponent is not None and wall_state == BulletState.WALL_NOT_HIT:
+                state = self.bullet_collision_enemy(
+                    shooter, oponent, sh)
+                return state
+            return wall_state
+        return BulletState.NO_BULLET
 
-    def bullet_collision(self, object, collision_group, destroyable_group):
+    def bullet_collision_wall(self, object, collision_group, destroyable_group):
         for collision_object in collision_group:
             if collision_object.rect.colliderect(object.shot_bullets[0].rect):
                 if collision_object in destroyable_group:
                     collision_object.kill()
                 object.shot_bullets[0].kill()
                 object.shot_bullets.clear()
-                return
+                return BulletState.WALL_HIT
+        return BulletState.WALL_NOT_HIT
 
-    def randomize_direction(self, enemy, direction):
+    def bullet_collision_enemy(self, shooter, oponent, sh):
+        if oponent.rect.colliderect(shooter.shot_bullets[0].rect):
+            shooter.shot_bullets[0].image.fill
+            shooter.shot_bullets[0].image.set_alpha(255)
+            shooter.shot_bullets[0].kill()
+            shooter.shot_bullets.clear()
+            oponent.kill()
+            return BulletState.TARGET_HIT
+
+    def set_new_enemy_direction(self, enemy, direction):
         if direction == MoveDirection.UP:
             enemy.direction = pygame.math.Vector2(0, -1)
         elif direction == MoveDirection.DOWN:
@@ -151,7 +171,7 @@ class MoveController:
                 directions.remove(MoveDirection.RIGHT)
         if len(directions) < 3:
             enemy.direction = pygame.math.Vector2(0, 0)
-            self.randomize_direction(enemy, choice(directions))
+            self.set_new_enemy_direction(enemy, choice(directions))
 
         enemy.rect.x += enemy.direction.x * EnemySettings.SPEED
         enemy.rect.y += enemy.direction.y * EnemySettings.SPEED

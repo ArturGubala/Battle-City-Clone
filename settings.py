@@ -21,6 +21,8 @@ class PlayerSettings:
     STARTING_POS = (448, 896)
     SPEED = 6
     ASSIST_LEVEL = 15
+    STARTING_SPRITE_PATH = "Sprites/Player/player.png"
+    ANIMATION_SPRITES_PATH = "Sprites/Player/"
 
 
 @dataclass
@@ -39,3 +41,13 @@ class EnemySettings:
     STARTING_POS = (960, 64)
     SPEED = 6
     ASSIST_LEVEL = 15
+    STARTING_SPRITE_PATH = "Sprites/Player/player.png"
+    ANIMATION_SPRITES_PATH = "Sprites/Enemy/"
+
+
+@dataclass
+class StageSettings:
+    BORDER_LAYOUT = "Stages/Stage_0/stage_0_border.csv"
+    STAGE_LAYOUT = "Stages/Stage_0/stage_0_stage.csv"
+    TARGET_LAYOUT = "Stages/Stage_0/stage_0_target.csv"
+    STAGE_SPRITES = "Sprites/Obstacles"
