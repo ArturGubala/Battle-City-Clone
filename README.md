@@ -4,7 +4,7 @@ This is a very simple version of Battle City from NES. I decided to made this ga
 I tried to write this game in the vein of MVC design pattern, so class:
 * **ScreenHandler** holds all sprites classes togather - represents *View*,
 * **MoveController** is responsible for moving around player, enemies and bullets - represents *Controller*
-### Build with
+### Built with
 * Python 3.10
 * Pygame 2.0
 * Tiled
