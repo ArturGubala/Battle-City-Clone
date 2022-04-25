@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-import os.path
-
 
 @dataclass
 class GameSettings:
@@ -9,8 +7,6 @@ class GameSettings:
     WINDOW_HEIGHT = 960
     FPS = 60
     CAPTION = "Battle City Clone"
-    SPRITE_SHEET = os.path.join(
-        "Sprites", "NES - Battle City JPN - General Sprites.png")
 
 
 @dataclass
@@ -21,10 +17,37 @@ class Colors:
 
 @dataclass
 class PlayerSettings:
-    PLAYER_WIDTH = 16
-    PLAYER_HEIGHT = 16
-    SCALE = 3
-    STARTING_POS = (GameSettings.WINDOW_WIDTH // 2 - PLAYER_WIDTH // 2,
-                    GameSettings.WINDOW_HEIGHT // 2 - PLAYER_HEIGHT // 2)
-    SPEED = 5
-    ANGLE = 0
+    PLAYER_SIZE = (64, 64)
+    STARTING_POS = (448, 896)
+    SPEED = 6
+    ASSIST_LEVEL = 15
+    STARTING_SPRITE_PATH = "Sprites/Player/player.png"
+    ANIMATION_SPRITES_PATH = "Sprites/Player/"
+
+
+@dataclass
+class SpriteSettings:
+    SPRITESIZE = 64
+
+
+@dataclass
+class BulletSettings:
+    SPEED = 15
+
+
+@dataclass
+class EnemySettings:
+    ENEMY_SIZE = (64, 64)
+    STARTING_POS = (960, 64)
+    SPEED = 6
+    ASSIST_LEVEL = 15
+    STARTING_SPRITE_PATH = "Sprites/Player/player.png"
+    ANIMATION_SPRITES_PATH = "Sprites/Enemy/"
+
+
+@dataclass
+class StageSettings:
+    BORDER_LAYOUT = "Stages/Stage_0/stage_0_border.csv"
+    STAGE_LAYOUT = "Stages/Stage_0/stage_0_stage.csv"
+    TARGET_LAYOUT = "Stages/Stage_0/stage_0_target.csv"
+    STAGE_SPRITES = "Sprites/Obstacles"
